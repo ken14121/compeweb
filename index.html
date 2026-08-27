@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>高校生設計競技 2026-27</title>
+<style>
+:root{
+  --jp:"游ゴシック体", YuGothic, "游ゴシック Medium", "Yu Gothic Medium", "游ゴシック", "Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  --paper:#fbfaf7;
+  --ink:#0f0f0e;
+  --sub:#7b776f;
+  --line:#e0dcd4;
+  --hair:#cfc9bf;
+  --ac:#c8442e;          /* 朱 */
+  --dark:#16150f;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--jp);font-weight:500;color:var(--ink);background:var(--paper);
+  font-size:15px;line-height:1.95;-webkit-font-smoothing:antialiased;
+  font-feature-settings:"palt";overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none;}
+::selection{background:var(--ac);color:#fff;}
+
+/* ───────── 図面シートの枠 ───────── */
+.sheet{position:fixed;inset:14px;border:1px solid var(--hair);pointer-events:none;z-index:60;}
+.sheet i{position:absolute;width:11px;height:11px;border:0 solid var(--ink);}
+.sheet i:nth-child(1){top:-1px;left:-1px;border-top-width:2px;border-left-width:2px;}
+.sheet i:nth-child(2){top:-1px;right:-1px;border-top-width:2px;border-right-width:2px;}
+.sheet i:nth-child(3){bottom:-1px;left:-1px;border-bottom-width:2px;border-left-width:2px;}
+.sheet i:nth-child(4){bottom:-1px;right:-1px;border-bottom-width:2px;border-right-width:2px;}
+@media(max-width:860px){.sheet{display:none;}}
+
+/* ───────── header ───────── */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:26px 42px;mix-blend-mode:normal;
+}
+.brand{font-size:12px;letter-spacing:.1em;line-height:1.55;}
+.brand b{font-weight:600;}
+.brand small{display:block;font-size:9px;letter-spacing:.2em;color:var(--sub);}
+.topnav{display:flex;gap:26px;align-items:center;}
+.topnav a{font-size:11px;letter-spacing:.14em;color:#4a4740;position:relative;padding-bottom:3px;}
+.topnav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1px;background:var(--ac);transition:right .3s;}
+.topnav a:hover::after{right:0;}
+.entry-btn{
+  font-size:11px;letter-spacing:.14em;border:1px solid var(--ink);
+  padding:9px 20px;transition:.25s;
+}
+.entry-btn:hover{background:var(--ink);color:var(--paper);}
+.entry-btn::after{display:none;}
+.menu-btn{display:none;width:30px;height:20px;position:relative;background:none;border:none;cursor:pointer;}
+.menu-btn span{position:absolute;left:0;right:0;height:1px;background:var(--ink);transition:.3s;}
+.menu-btn span:nth-child(1){top:3px;}.menu-btn span:nth-child(2){top:10px;}.menu-btn span:nth-child(3){top:17px;}
+body.nav-open .menu-btn span:nth-child(1){top:10px;transform:rotate(45deg);}
+body.nav-open .menu-btn span:nth-child(2){opacity:0;}
+body.nav-open .menu-btn span:nth-child(3){top:10px;transform:rotate(-45deg);}
+#drawer{
+  position:fixed;inset:0;background:var(--paper);z-index:49;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .35s;
+}
+body.nav-open #drawer{opacity:1;pointer-events:auto;}
+#drawer ol{list-style:none;}
+#drawer li{margin:12px 0;}
+#drawer a{font-size:20px;letter-spacing:.05em;}
+#drawer em{font-style:normal;font-size:10px;color:var(--ac);letter-spacing:.18em;margin-right:16px;}
+@media(max-width:1000px){
+  .topnav{display:none;}
+  .menu-btn{display:block;}
+  header{padding:22px 26px;}
+}
+
+/* ───────── 左レール（現在地） ───────── */
+.rail{
+  position:fixed;left:42px;top:50%;transform:translateY(-50%);z-index:45;
+  display:flex;flex-direction:column;gap:11px;
+}
+.rail a{display:flex;align-items:center;gap:9px;font-size:9px;letter-spacing:.16em;color:#b6b1a8;transition:.3s;}
+.rail a span{display:block;width:12px;height:1px;background:#cfc9bf;transition:.3s;}
+.rail a.on{color:var(--ac);}
+.rail a.on span{width:26px;background:var(--ac);}
+.rail a:hover{color:var(--ink);}
+@media(max-width:1240px){.rail{display:none;}}
+
+/* ───────── hero ───────── */
+.hero{
+  min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+  padding:130px 42px 0;max-width:1240px;margin:0 auto;position:relative;
+}
+.kicker{display:flex;align-items:center;gap:14px;font-size:10px;letter-spacing:.26em;color:var(--sub);margin-bottom:34px;}
+.kicker s{display:block;width:52px;height:1px;background:var(--ac);text-decoration:none;}
+.hero h1{
+  font-size:clamp(34px,7.4vw,88px);font-weight:600;line-height:1.32;letter-spacing:-.005em;
+  margin-bottom:34px;
+}
+.hero h1 u{text-decoration:none;position:relative;white-space:nowrap;}
+.hero h1 u::after{
+  content:"";position:absolute;left:-.05em;right:-.05em;bottom:.12em;height:.34em;
+  background:var(--ac);opacity:.16;z-index:-1;
+}
+.hero .lede{font-size:15px;color:#413e38;max-width:34em;}
+.hero .lede b{font-weight:600;}
+.yearmark{
+  position:absolute;right:42px;top:22vh;text-align:right;line-height:1;
+  font-size:clamp(40px,9vw,120px);font-weight:600;color:transparent;
+  -webkit-text-stroke:1px var(--hair);letter-spacing:-.02em;pointer-events:none;user-select:none;
+}
+.yearmark small{display:block;font-size:10px;letter-spacing:.3em;color:var(--sub);
+  -webkit-text-stroke:0;margin-top:14px;font-weight:500;}
+@media(max-width:860px){.yearmark{display:none;}.hero{padding:120px 26px 0;}}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:44px;}
+.btn{display:inline-block;border:1px solid var(--ink);padding:14px 34px;font-size:13px;letter-spacing:.08em;transition:.25s;}
+.btn:hover{background:var(--ink);color:var(--paper);}
+.btn.fill{background:var(--ac);border-color:var(--ac);color:#fff;}
+.btn.fill:hover{background:var(--ink);border-color:var(--ink);}
+.hero .fine{font-size:11px;color:var(--sub);margin-top:34px;letter-spacing:.02em;}
+
+/* ───────── ticker（協賛企業ロゴ） ───────── */
+.ticker{
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin-top:60px;padding:14px 0;overflow:hidden;white-space:nowrap;
+}
+.ticker .row{display:inline-flex;align-items:center;gap:18px;animation:slide 70s linear infinite;}
+.ticker span{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:150px;height:42px;border:1px solid var(--line);background:#fffdfa;
+  font-size:10px;color:#8d887c;letter-spacing:.16em;padding:0 18px;
+}
+@keyframes slide{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ───────── 数字バンド ───────── */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  max-width:1240px;margin:0 auto;padding:64px 42px;gap:20px;
+}
+.stats div{border-top:1px solid var(--ink);padding-top:14px;}
+.stats b{display:block;font-size:clamp(26px,3.6vw,44px);font-weight:600;line-height:1.15;letter-spacing:-.01em;}
+.stats b i{font-style:normal;font-size:.42em;margin-left:3px;color:var(--sub);}
+.stats p{font-size:11px;color:var(--sub);letter-spacing:.08em;margin-top:4px;}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr);padding:48px 26px;}}
+
+/* ───────── sections ───────── */
+.page{max-width:1240px;margin:0 auto;padding:0 42px;}
+@media(max-width:860px){.page{padding:0 26px;}}
+section{padding:96px 0;border-top:1px solid var(--line);}
+.sec{display:grid;grid-template-columns:200px 1fr;gap:0 48px;}
+@media(max-width:960px){.sec{grid-template-columns:1fr;gap:26px;}}
+.sec-label{position:sticky;top:110px;align-self:start;}
+.sec-label .n{font-size:10px;letter-spacing:.2em;color:var(--ac);display:block;margin-bottom:8px;}
+.sec-label h2{font-size:22px;font-weight:600;letter-spacing:.05em;line-height:1.4;}
+.sec-label .en{font-size:9px;letter-spacing:.22em;color:var(--sub);margin-top:8px;display:block;}
+.lead{font-size:16px;line-height:2.05;color:#33302b;max-width:40em;margin-bottom:44px;}
+.lead strong{font-weight:600;background:linear-gradient(transparent 62%, rgba(200,68,46,.18) 62%);}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+.cards article{background:var(--paper);padding:28px 24px;}
+.cards .n{font-size:10px;letter-spacing:.2em;color:var(--ac);}
+.cards h3{font-size:15px;font-weight:600;margin:10px 0 10px;line-height:1.6;}
+.cards p{font-size:13px;color:#5a564f;line-height:1.95;}
+@media(max-width:860px){.cards{grid-template-columns:1fr;}}
+
+dl.spec{border-top:1px solid var(--hair);}
+dl.spec > div{display:grid;grid-template-columns:160px 1fr;gap:0 24px;padding:20px 0;border-bottom:1px solid var(--line);}
+dl.spec dt{font-size:12px;color:var(--sub);letter-spacing:.08em;padding-top:2px;}
+dl.spec dd{font-size:14px;line-height:1.95;}
+@media(max-width:640px){dl.spec > div{grid-template-columns:1fr;gap:4px;}}
+
+/* schedule */
+.tl{position:relative;padding-left:26px;}
+.tl::before{content:"";position:absolute;left:4px;top:14px;bottom:14px;width:1px;background:var(--hair);}
+.tl li{list-style:none;position:relative;padding:0 0 46px;}
+.tl li:last-child{padding-bottom:0;}
+.tl li::before{content:"";position:absolute;left:-26px;top:11px;width:9px;height:9px;border-radius:50%;background:var(--paper);border:1px solid var(--ac);}
+.tl li.now::before{background:var(--ac);}
+.tl .date{font-size:12px;letter-spacing:.08em;color:var(--ac);}
+.tl h3{font-size:17px;font-weight:600;margin:4px 0 6px;}
+.tl p{font-size:13px;color:var(--sub);}
+
+/* prize */
+.prize{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+.prize article{border-top:2px solid var(--ink);padding-top:18px;}
+.prize article:nth-child(2){border-color:var(--ac);}
+.prize .ttl{font-size:14px;font-weight:600;letter-spacing:.06em;}
+.prize .cnt{font-size:11px;color:var(--sub);letter-spacing:.1em;}
+.prize .amt{font-size:clamp(24px,3vw,34px);font-weight:600;margin-top:12px;letter-spacing:-.01em;}
+.prize .amt i{font-style:normal;font-size:.44em;margin-left:2px;color:var(--sub);}
+.prize .desc{font-size:17px;font-weight:600;line-height:1.7;margin-top:12px;}
+@media(max-width:960px){.prize{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:760px){.prize{grid-template-columns:1fr;gap:16px;}}
+
+/* flow */
+ol.flow{list-style:none;counter-reset:f;border-top:1px solid var(--hair);}
+ol.flow li{counter-increment:f;display:grid;grid-template-columns:52px 1fr;gap:20px;padding:20px 0;border-bottom:1px solid var(--line);}
+ol.flow li::before{content:"STEP\A 0" counter(f);white-space:pre;font-size:9px;letter-spacing:.16em;color:var(--ac);line-height:1.7;padding-top:4px;}
+ol.flow b{font-weight:600;font-size:15px;}
+ol.flow span{display:block;font-size:13px;color:var(--sub);}
+
+/* sponsor（濃色帯） */
+.dark{background:var(--dark);color:#eae7de;border-top:none;}
+.dark .sec-label h2{color:#fff;}
+.dark .sec-label .n,.dark .sec-label .en{color:#c8442e;}
+.dark .sec-label .en{color:#8d887c;}
+.dark .lead{color:#c8c3b8;}
+.dark .lead strong{background:linear-gradient(transparent 62%, rgba(200,68,46,.4) 62%);color:#fff;}
+.matrix{width:100%;border-collapse:collapse;font-size:13px;}
+.matrix th,.matrix td{border-bottom:1px solid rgba(255,255,255,.12);padding:14px 10px;text-align:center;}
+.matrix thead th{font-size:11px;letter-spacing:.16em;font-weight:600;padding-bottom:16px;}
+.matrix thead th:first-child{text-align:left;letter-spacing:.06em;color:#8d887c;font-weight:500;}
+.matrix tbody th{text-align:left;font-weight:500;color:#d6d1c6;font-size:13px;}
+.matrix .pt{color:#fff;}
+.matrix .o{color:var(--ac);font-size:15px;}
+.matrix .x{color:#4b4841;}
+.matrix tfoot td,.matrix tfoot th{border-bottom:none;font-size:11px;color:#8d887c;letter-spacing:.06em;padding-top:16px;}
+.dark .note{color:#8d887c;}
+.dark .btn{border-color:#eae7de;color:#eae7de;}
+.dark .btn:hover{background:#eae7de;color:var(--dark);}
+.mwrap{overflow-x:auto;}
+
+/* contact */
+.contact-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+.contact-grid div{background:var(--paper);padding:26px 24px;}
+.contact-grid .k{font-size:10px;letter-spacing:.18em;color:var(--sub);margin-bottom:6px;}
+.contact-grid .v{font-size:15px;}
+@media(max-width:640px){.contact-grid{grid-template-columns:1fr;}}
+
+.tbd{color:#a8a299;border-bottom:1px dotted #c7c0b6;}
+.note{font-size:11px;color:var(--sub);margin-top:22px;line-height:1.95;letter-spacing:.02em;}
+.inline-link{border-bottom:1px solid var(--hair);transition:.2s;}
+.inline-link:hover{border-color:var(--ac);color:var(--ac);}
+
+footer{border-top:1px solid var(--line);}
+.foot{max-width:1240px;margin:0 auto;padding:52px 42px 64px;display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;}
+.foot .l b{font-size:14px;font-weight:600;letter-spacing:.06em;display:block;}
+.foot .l small{font-size:9px;letter-spacing:.2em;color:var(--sub);}
+.foot .r{font-size:10px;color:var(--sub);letter-spacing:.1em;text-align:right;}
+@media(max-width:860px){.foot{padding:44px 26px 56px;}}
+
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .85s cubic-bezier(.2,.7,.2,1),transform .85s cubic-bezier(.2,.7,.2,1);}
+.reveal.in{opacity:1;transform:none;}
+
+/* スクロール進捗 */
+#prog{position:fixed;left:0;top:0;height:2px;background:var(--ac);z-index:70;width:0;}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+<div class="sheet"><i></i><i></i><i></i><i></i></div>
+
+<header>
+  <a class="brand" href="#top"><b>高校生設計競技 2026-27</b><small>HIGH SCHOOL ARCHITECTURAL DESIGN COMPETITION</small></a>
+  <div class="topnav">
+    <a href="#about">開催概要</a>
+    <a href="#req">募集要項</a>
+    <a href="#schedule">スケジュール</a>
+    <a href="#prize">賞</a>
+    <a href="#flow">応募の流れ</a>
+    <a href="#sponsor">協賛</a>
+    <a class="entry-btn" href="#contact">応募登録</a>
+  </div>
+  <button class="menu-btn" id="menuBtn" aria-label="メニュー"><span></span><span></span><span></span></button>
+</header>
+
+<div id="drawer">
+  <ol>
+    <li><a href="#about"><em>01</em>開催概要</a></li>
+    <li><a href="#req"><em>02</em>募集要項</a></li>
+    <li><a href="#schedule"><em>03</em>スケジュール</a></li>
+    <li><a href="#prize"><em>04</em>賞</a></li>
+    <li><a href="#flow"><em>05</em>応募の流れ</a></li>
+    <li><a href="#sponsor"><em>06</em>協賛企業募集</a></li>
+    <li><a href="#contact"><em>07</em>お問い合わせ</a></li>
+  </ol>
+</div>
+
+<div class="rail" id="rail">
+  <a href="#about"><span></span>01</a>
+  <a href="#req"><span></span>02</a>
+  <a href="#schedule"><span></span>03</a>
+  <a href="#prize"><span></span>04</a>
+  <a href="#flow"><span></span>05</a>
+  <a href="#sponsor"><span></span>06</a>
+  <a href="#contact"><span></span>07</a>
+</div>
+
+<div id="top" class="hero">
+  <div class="yearmark">2026<br>—27<small>FIRST EDITION</small></div>
+  <div class="kicker"><s></s>第1回／関東甲信越の工業高校生対象</div>
+  <h1>作品を<br><u>つくらない</u>コンペ。</h1>
+  <p class="lede">学校の課題が、そのまま作品になります。授業や課題で取り組んだ<b>設計作品を、そのまま応募</b>できる設計競技です。</p>
+  <div class="hero-cta">
+    <a class="btn fill" href="#contact">応募登録（準備中）</a>
+    <a class="btn" href="#req">募集要項を見る</a>
+  </div>
+  <p class="fine">※ 本サイトに掲載の日程・賞などはすべて予定です。確定次第、随時更新します。</p>
+  <div class="ticker"><div class="row" id="ticker"></div></div>
+</div>
+
+<div class="stats">
+  <div><b>100<i>点</i></b><p>入選</p></div>
+  <div><b>1<i>点</i></b><p>最優秀賞</p></div>
+  <div><b>4<i>点</i></b><p>優秀賞</p></div>
+  <div><b>若干</b><p>企業賞</p></div>
+</div>
+
+<div class="page">
+
+  <section id="about" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">01</span><h2>開催概要</h2><span class="en">ABOUT</span></div>
+      <div>
+        <p class="lead">本競技は、関東甲信越の工業高校に在籍する生徒を対象とした設計競技です。<strong>新たに作品を制作する必要はありません。</strong>授業や課題で取り組んだ設計作品を、そのまま応募することができます。設計に取り組んだ高校生と、その力を求める企業とをつなぐ場をめざします。</p>
+        <div class="cards">
+          <article><div class="n">01</div><h3>課題作品で<br>そのまま応募</h3><p>授業で描いた図面や模型写真を、そのまま提出できます。</p></article>
+          <article><div class="n">02</div><h3>Googleフォームで<br>完結</h3><p>個人で応募。応募登録、作品提出はGoogleフォームで行います。</p></article>
+          <article><div class="n">03</div><h3>企業と出会える<br>交流会</h3><p>二次審査の当日には協賛企業との交流会を開催。進路や仕事の話を直接聞くことができます。</p></article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="req" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">02</span><h2>募集要項</h2><span class="en">REQUIREMENTS</span></div>
+      <div>
+        <dl class="spec">
+          <div><dt>応募資格</dt><dd>2027年4月現在、関東甲信越の工業高等学校在籍の生徒。応募は個人とする。</dd></div>
+          <div><dt>応募作品</dt><dd>授業や課題で取り組んだ設計作品。</dd></div>
+          <div><dt>提出物</dt><dd>授業や課題で取り組んだ設計作品<br>（※デジタルデータにて提出）<br>・用紙サイズ、図面内容、表現内容については問わない</dd></div>
+          <div><dt>応募方法</dt><dd>応募登録・作品提出ともにGoogleフォームより受付</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="schedule" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">03</span><h2>スケジュール</h2><span class="en">SCHEDULE</span></div>
+      <div>
+        <ul class="tl">
+          <li class="now"><div class="date">2026.09 中旬頃 — 12月31日まで</div><h3>応募登録・作品受付</h3><p>応募登録、作品提出はGoogleフォームで行います。</p></li>
+          <li><div class="date">2027.01 中旬頃</div><h3>一次審査</h3><p>提出作品の審査により、二次審査進出作品を100点選出します。</p></li>
+          <li><div class="date">2027.01 下旬頃</div><h3>二次審査・交流会・表彰式</h3><p>プレゼンテーション審査ののち、協賛企業との交流会・表彰式を行います。</p></li>
+        </ul>
+        <p class="note">※ 上記の日程はすべて予定です。確定次第、本サイトおよび公式 Instagram にて発表します。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="prize" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">04</span><h2>賞</h2><span class="en">PRIZE</span></div>
+      <div>
+        <div class="prize">
+          <article><div class="ttl">入選</div><div class="cnt">100 点</div><div class="desc">二次審査進出作品</div></article>
+          <article><div class="ttl">最優秀賞</div><div class="cnt">1 点</div><div class="amt">20,000<i>円</i></div></article>
+          <article><div class="ttl">優秀賞</div><div class="cnt">4 点</div><div class="amt">10,000<i>円</i></div></article>
+          <article><div class="ttl">企業賞</div><div class="cnt">若干</div><div class="desc">協賛企業各社より授与</div></article>
+        </div>
+        <p class="note">※ 賞の構成・賞金額は予定です。企業賞は協賛企業数により変動します。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="flow" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">05</span><h2>応募の流れ</h2><span class="en">FLOW</span></div>
+      <div>
+        <ol class="flow">
+          <li><div><b>応募登録</b><span>Googleフォームより応募登録を行います。</span></div></li>
+          <li><div><b>課題作品の準備</b><span>授業で取り組んだ設計課題を、提出形式に整えます。</span></div></li>
+          <li><div><b>作品提出</b><span>Googleフォームより作品データを提出します。</span></div></li>
+          <li><div><b>一次審査</b><span>提出作品の審査により、二次審査進出作品を100点選出します。</span></div></li>
+          <li><div><b>二次審査・プレゼンテーション</b><span>作品のプレゼンテーション審査を行います。</span></div></li>
+          <li><div><b>交流会・表彰式</b><span>協賛企業との交流会ののち、表彰式を行います。</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  </div>
+
+  <section id="sponsor" class="dark reveal">
+    <div style="max-width:1240px;margin:0 auto;padding:0 42px;">
+    <div class="sec">
+      <div class="sec-label"><span class="n">06</span><h2>協賛企業募集</h2><span class="en">SPONSORS</span></div>
+      <div>
+        <p class="lead">本競技は協賛企業の皆さまのご支援により運営されます。<strong>工業高校で実務的な設計教育を受けた生徒</strong>と直接つながる機会として、ぜひご検討ください。</p>
+        <div class="mwrap">
+        <table class="matrix">
+          <thead>
+            <tr><th>特典</th><th class="pt">PLATINUM</th><th>GOLD</th><th>SILVER</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>企業賞の設置</th><td class="o">●</td><td class="x">—</td><td class="x">—</td></tr>
+            <tr><th>公式 Instagram 最上位広告掲載</th><td class="o">●</td><td class="x">—</td><td class="x">—</td></tr>
+            <tr><th>コンペ広告への企業ロゴ掲載</th><td class="o">●</td><td class="o">●</td><td class="x">—</td></tr>
+            <tr><th>公式 Instagram 広告掲載</th><td class="o">●</td><td class="o">●</td><td class="x">—</td></tr>
+            <tr><th>学生交流会 参加権</th><td class="o">●</td><td class="o">●</td><td class="x">—</td></tr>
+            <tr><th>採用・インターン情報の掲載</th><td class="o">●</td><td class="o">●</td><td class="o">●</td></tr>
+            <tr><th>表彰式での企業紹介</th><td class="o">●</td><td class="o">●</td><td class="o">●</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><th>枠数</th><td>限定 5 枠</td><td>制限なし</td><td>制限なし</td></tr>
+          </tfoot>
+        </table>
+        </div>
+        <p class="note">※ 協賛金額および詳細につきましては、お問い合わせよりご連絡ください。</p>
+        <div style="margin-top:28px"><a class="btn" href="#contact">協賛について問い合わせる</a></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <div class="page">
+  <section id="contact" class="reveal" style="border-top:none">
+    <div class="sec">
+      <div class="sec-label"><span class="n">07</span><h2>お問い合わせ</h2><span class="en">CONTACT</span></div>
+      <div>
+        <div class="contact-grid">
+          <div><div class="k">ORGANIZER</div><div class="v">高校生設計競技 実行委員会</div></div>
+          <div><div class="k">E-MAIL</div><div class="v"><span class="tbd">（メールアドレス未定）</span></div></div>
+          <div><div class="k">INSTAGRAM</div><div class="v"><span class="tbd">（アカウント未定）</span></div></div>
+          <div><div class="k">ENTRY FORM</div><div class="v"><span class="tbd">（Googleフォーム URL 未定）</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="foot">
+    <div class="l"><b>高校生設計競技 2026-27</b><small>HIGH SCHOOL ARCHITECTURAL DESIGN COMPETITION</small></div>
+    <div class="r"><time datetime="2026-08-22">更新日：2026.08.22</time><br>© 2026 高校生設計競技</div>
+  </div>
+</footer>
+
+<script>
+const SPONSOR_LOGOS=[
+  'SPONSOR LOGO','PARTNER LOGO','COMPANY LOGO','SUPPORTER LOGO',
+  'SPONSOR LOGO','PARTNER LOGO','COMPANY LOGO','SUPPORTER LOGO'
+];
+
+const row=SPONSOR_LOGOS.map(name=>'<span>'+name+'</span>').join('');
+document.getElementById('ticker').innerHTML=row+row;
+
+document.getElementById('menuBtn').addEventListener('click',()=>document.body.classList.toggle('nav-open'));
+document.querySelectorAll('#drawer a').forEach(a=>a.addEventListener('click',()=>document.body.classList.remove('nav-open')));
+
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* 左レールの現在地 */
+const rail=[...document.querySelectorAll('.rail a')];
+const secs=rail.map(a=>document.querySelector(a.getAttribute('href')));
+const io2=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const i=secs.indexOf(e.target);
+    rail.forEach((a,k)=>a.classList.toggle('on',k===i));
+  });
+},{rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>s&&io2.observe(s));
+
+/* スクロール進捗 */
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-innerHeight;
+  prog.style.width=(h>0?window.scrollY/h*100:0)+'%';
+},{passive:true});
+</script>
+</body>
+</html>
