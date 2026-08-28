@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CTF 参加者向け案内 — bat</title>
+<style>
+:root{
+  --jp:"游ゴシック体", YuGothic, "游ゴシック Medium", "Yu Gothic Medium", "游ゴシック", "Yu Gothic", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  --mono:"SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --paper:#fbfaf7;
+  --ink:#0f0f0e;
+  --sub:#7b776f;
+  --line:#e0dcd4;
+  --hair:#cfc9bf;
+  --ac:#c8442e;          /* 朱 */
+  --dark:#16150f;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--jp);font-weight:500;color:var(--ink);background:var(--paper);
+  font-size:15px;line-height:1.95;-webkit-font-smoothing:antialiased;
+  font-feature-settings:"palt";overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none;}
+::selection{background:var(--ac);color:#fff;}
+
+.sheet{position:fixed;inset:14px;border:1px solid var(--hair);pointer-events:none;z-index:60;}
+.sheet i{position:absolute;width:11px;height:11px;border:0 solid var(--ink);}
+.sheet i:nth-child(1){top:-1px;left:-1px;border-top-width:2px;border-left-width:2px;}
+.sheet i:nth-child(2){top:-1px;right:-1px;border-top-width:2px;border-right-width:2px;}
+.sheet i:nth-child(3){bottom:-1px;left:-1px;border-bottom-width:2px;border-left-width:2px;}
+.sheet i:nth-child(4){bottom:-1px;right:-1px;border-bottom-width:2px;border-right-width:2px;}
+@media(max-width:860px){.sheet{display:none;}}
+
+header{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:26px 42px;
+}
+.brand{font-size:12px;letter-spacing:.1em;line-height:1.55;}
+.brand b{font-weight:600;}
+.brand small{display:block;font-size:9px;letter-spacing:.2em;color:var(--sub);}
+.topnav{display:flex;gap:26px;align-items:center;}
+.topnav a{font-size:11px;letter-spacing:.14em;color:#4a4740;position:relative;padding-bottom:3px;}
+.topnav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1px;background:var(--ac);transition:right .3s;}
+.topnav a:hover::after{right:0;}
+.entry-btn{font-size:11px;letter-spacing:.14em;border:1px solid var(--ink);padding:9px 20px;transition:.25s;}
+.entry-btn:hover{background:var(--ink);color:var(--paper);}
+.entry-btn::after{display:none;}
+.menu-btn{display:none;width:30px;height:20px;position:relative;background:none;border:none;cursor:pointer;}
+.menu-btn span{position:absolute;left:0;right:0;height:1px;background:var(--ink);transition:.3s;}
+.menu-btn span:nth-child(1){top:3px;}.menu-btn span:nth-child(2){top:10px;}.menu-btn span:nth-child(3){top:17px;}
+body.nav-open .menu-btn span:nth-child(1){top:10px;transform:rotate(45deg);}
+body.nav-open .menu-btn span:nth-child(2){opacity:0;}
+body.nav-open .menu-btn span:nth-child(3){top:10px;transform:rotate(-45deg);}
+#drawer{position:fixed;inset:0;background:var(--paper);z-index:49;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s;}
+body.nav-open #drawer{opacity:1;pointer-events:auto;}
+#drawer ol{list-style:none;}
+#drawer li{margin:12px 0;}
+#drawer a{font-size:20px;letter-spacing:.05em;}
+#drawer em{font-style:normal;font-size:10px;color:var(--ac);letter-spacing:.18em;margin-right:16px;}
+@media(max-width:1000px){.topnav{display:none;}.menu-btn{display:block;}header{padding:22px 26px;}}
+
+.rail{position:fixed;left:42px;top:50%;transform:translateY(-50%);z-index:45;display:flex;flex-direction:column;gap:11px;}
+.rail a{display:flex;align-items:center;gap:9px;font-size:9px;letter-spacing:.16em;color:#b6b1a8;transition:.3s;}
+.rail a span{display:block;width:12px;height:1px;background:#cfc9bf;transition:.3s;}
+.rail a.on{color:var(--ac);}
+.rail a.on span{width:26px;background:var(--ac);}
+.rail a:hover{color:var(--ink);}
+@media(max-width:1240px){.rail{display:none;}}
+
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:130px 42px 0;max-width:1240px;margin:0 auto;position:relative;}
+.kicker{display:flex;align-items:center;gap:14px;font-size:10px;letter-spacing:.26em;color:var(--sub);margin-bottom:34px;}
+.kicker s{display:block;width:52px;height:1px;background:var(--ac);text-decoration:none;}
+.hero h1{font-size:clamp(34px,7.4vw,88px);font-weight:600;line-height:1.32;letter-spacing:-.005em;margin-bottom:34px;}
+.hero h1 u{text-decoration:none;position:relative;white-space:nowrap;}
+.hero h1 u::after{content:"";position:absolute;left:-.05em;right:-.05em;bottom:.12em;height:.34em;background:var(--ac);opacity:.16;z-index:-1;}
+.hero .lede{font-size:15px;color:#413e38;max-width:34em;}
+.hero .lede b{font-weight:600;}
+.yearmark{position:absolute;right:42px;top:22vh;text-align:right;line-height:1;font-size:clamp(40px,9vw,120px);font-weight:600;color:transparent;-webkit-text-stroke:1px var(--hair);letter-spacing:-.02em;pointer-events:none;user-select:none;}
+.yearmark small{display:block;font-size:10px;letter-spacing:.3em;color:var(--sub);-webkit-text-stroke:0;margin-top:14px;font-weight:500;}
+@media(max-width:860px){.yearmark{display:none;}.hero{padding:120px 26px 0;}}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:44px;}
+.btn{display:inline-block;border:1px solid var(--ink);padding:14px 34px;font-size:13px;letter-spacing:.08em;transition:.25s;}
+.btn:hover{background:var(--ink);color:var(--paper);}
+.btn.fill{background:var(--ac);border-color:var(--ac);color:#fff;}
+.btn.fill:hover{background:var(--ink);border-color:var(--ink);}
+.hero .fine{font-size:11px;color:var(--sub);margin-top:34px;letter-spacing:.02em;}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);max-width:1240px;margin:0 auto;padding:24px 42px 64px;gap:20px;}
+.stats div{border-top:1px solid var(--ink);padding-top:14px;}
+.stats b{display:block;font-size:clamp(20px,3vw,34px);font-weight:600;line-height:1.15;letter-spacing:-.01em;}
+.stats b i{font-style:normal;font-size:.42em;margin-left:3px;color:var(--sub);}
+.stats p{font-size:11px;color:var(--sub);letter-spacing:.08em;margin-top:4px;}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr);padding:16px 26px 48px;}}
+
+.page{max-width:1240px;margin:0 auto;padding:0 42px;}
+@media(max-width:860px){.page{padding:0 26px;}}
+section{padding:96px 0;border-top:1px solid var(--line);}
+.sec{display:grid;grid-template-columns:200px 1fr;gap:0 48px;}
+@media(max-width:960px){.sec{grid-template-columns:1fr;gap:26px;}}
+.sec-label{position:sticky;top:110px;align-self:start;}
+.sec-label .n{font-size:10px;letter-spacing:.2em;color:var(--ac);display:block;margin-bottom:8px;}
+.sec-label h2{font-size:22px;font-weight:600;letter-spacing:.05em;line-height:1.4;}
+.sec-label .en{font-size:9px;letter-spacing:.22em;color:var(--sub);margin-top:8px;display:block;}
+.lead{font-size:16px;line-height:2.05;color:#33302b;max-width:40em;margin-bottom:44px;}
+.lead strong{font-weight:600;background:linear-gradient(transparent 62%, rgba(200,68,46,.18) 62%);}
+
+dl.spec{border-top:1px solid var(--hair);}
+dl.spec > div{display:grid;grid-template-columns:160px 1fr;gap:0 24px;padding:20px 0;border-bottom:1px solid var(--line);}
+dl.spec dt{font-size:12px;color:var(--sub);letter-spacing:.08em;padding-top:2px;}
+dl.spec dd{font-size:14px;line-height:1.95;}
+dl.spec dd .u{font-family:var(--mono);font-size:13px;word-break:break-all;}
+@media(max-width:640px){dl.spec > div{grid-template-columns:1fr;gap:4px;}}
+
+.tag{display:inline-block;font-size:10px;letter-spacing:.14em;color:var(--ac);border:1px solid var(--ac);border-radius:2px;padding:2px 8px;margin-left:8px;vertical-align:middle;}
+
+.mwrap{overflow-x:auto;}
+table.cred{width:100%;border-collapse:collapse;font-size:13px;border-top:1px solid var(--hair);}
+table.cred th,table.cred td{border-bottom:1px solid var(--line);padding:14px 12px;text-align:left;vertical-align:top;}
+table.cred thead th{font-size:11px;letter-spacing:.12em;color:var(--sub);font-weight:600;}
+table.cred td.mono{font-family:var(--mono);font-size:13px;}
+table.cred td .note-inline{color:var(--sub);font-size:12px;}
+
+.callout{border:1px solid var(--hair);border-left:3px solid var(--ac);background:#fffdfa;padding:18px 22px;margin-top:26px;font-size:13px;line-height:1.95;color:#4a4740;}
+.callout b{font-weight:600;color:var(--ink);}
+
+.tl{position:relative;padding-left:26px;}
+.tl::before{content:"";position:absolute;left:4px;top:14px;bottom:14px;width:1px;background:var(--hair);}
+.tl li{list-style:none;position:relative;padding:0 0 46px;}
+.tl li:last-child{padding-bottom:0;}
+.tl li::before{content:"";position:absolute;left:-26px;top:11px;width:9px;height:9px;border-radius:50%;background:var(--paper);border:1px solid var(--ac);}
+.tl li.now::before{background:var(--ac);}
+.tl .date{font-size:12px;letter-spacing:.08em;color:var(--ac);}
+.tl h3{font-size:17px;font-weight:600;margin:4px 0 6px;}
+.tl p{font-size:13px;color:var(--sub);}
+
+ol.flow{list-style:none;counter-reset:f;border-top:1px solid var(--hair);}
+ol.flow li{counter-increment:f;display:grid;grid-template-columns:52px 1fr;gap:20px;padding:20px 0;border-bottom:1px solid var(--line);}
+ol.flow li::before{content:"STEP\A 0" counter(f);white-space:pre;font-size:9px;letter-spacing:.16em;color:var(--ac);line-height:1.7;padding-top:4px;}
+ol.flow b{font-weight:600;font-size:15px;}
+ol.flow span{display:block;font-size:13px;color:var(--sub);}
+
+ol.rules{list-style:none;counter-reset:r;border-top:1px solid var(--hair);}
+ol.rules li{counter-increment:r;display:grid;grid-template-columns:40px 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.95;}
+ol.rules li::before{content:"0" counter(r);font-size:11px;letter-spacing:.1em;color:var(--ac);padding-top:4px;}
+ol.rules b{font-weight:600;}
+
+.faq div.q{border-bottom:1px solid var(--line);padding:22px 0;}
+.faq .q h3{font-size:15px;font-weight:600;line-height:1.7;}
+.faq .q h3 em{font-style:normal;color:var(--ac);margin-right:10px;}
+.faq .q p{font-size:13px;color:#5a564f;line-height:1.95;margin-top:8px;padding-left:26px;}
+
+.note{font-size:11px;color:var(--sub);margin-top:22px;line-height:1.95;letter-spacing:.02em;}
+.inline-link{border-bottom:1px solid var(--hair);transition:.2s;}
+.inline-link:hover{border-color:var(--ac);color:var(--ac);}
+
+footer{border-top:1px solid var(--line);}
+.foot{max-width:1240px;margin:0 auto;padding:52px 42px 64px;display:flex;justify-content:space-between;align-items:flex-end;gap:26px;flex-wrap:wrap;}
+.foot .l b{font-size:14px;font-weight:600;letter-spacing:.06em;display:block;}
+.foot .l small{font-size:9px;letter-spacing:.2em;color:var(--sub);}
+.foot .r{font-size:10px;color:var(--sub);letter-spacing:.1em;text-align:right;}
+@media(max-width:860px){.foot{padding:44px 26px 56px;}}
+
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .85s cubic-bezier(.2,.7,.2,1),transform .85s cubic-bezier(.2,.7,.2,1);}
+.reveal.in{opacity:1;transform:none;}
+#prog{position:fixed;left:0;top:0;height:2px;background:var(--ac);z-index:70;width:0;}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+<div class="sheet"><i></i><i></i><i></i><i></i></div>
+
+<header>
+  <a class="brand" href="#top"><b>CTF 参加者向け案内</b><small>CAPTURE THE FLAG — PARTICIPANT GUIDE</small></a>
+  <div class="topnav">
+    <a href="#basic">基本情報</a>
+    <a href="#access">アクセス先</a>
+    <a href="#login">ログイン情報</a>
+    <a href="#join">参加方法</a>
+    <a href="#rule">レギュレーション</a>
+    <a href="#faq">FAQ</a>
+    <a class="entry-btn" href="https://scoring-ranking.ftt2608.dabaas.net/" target="_blank" rel="noopener">採点サイト</a>
+  </div>
+  <button class="menu-btn" id="menuBtn" aria-label="メニュー"><span></span><span></span><span></span></button>
+</header>
+
+<div id="drawer">
+  <ol>
+    <li><a href="#basic"><em>01</em>基本情報</a></li>
+    <li><a href="#access"><em>02</em>アクセス先</a></li>
+    <li><a href="#login"><em>03</em>ログイン情報</a></li>
+    <li><a href="#join"><em>04</em>参加方法</a></li>
+    <li><a href="#submit"><em>05</em>フラグ提出</a></li>
+    <li><a href="#rule"><em>06</em>レギュレーション</a></li>
+    <li><a href="#faq"><em>07</em>FAQ</a></li>
+  </ol>
+</div>
+
+<div class="rail" id="rail">
+  <a href="#basic"><span></span>01</a>
+  <a href="#access"><span></span>02</a>
+  <a href="#login"><span></span>03</a>
+  <a href="#join"><span></span>04</a>
+  <a href="#submit"><span></span>05</a>
+  <a href="#rule"><span></span>06</a>
+  <a href="#faq"><span></span>07</a>
+</div>
+
+<div id="top" class="hero">
+  <div class="yearmark">CTF<br><small>ftt2608</small></div>
+  <div class="kicker"><s></s>チーム : bat</div>
+  <h1>フラグを、<br><u>探し出せ</u>。</h1>
+  <p class="lede">問題サイトを探索し、<b>FLAG&#123;...&#125;</b> 形式のフラグを見つけて、CTFd 採点サイトから提出してください。この案内には、アクセス先・ログイン情報・参加手順・ルールをまとめています。</p>
+  <div class="hero-cta">
+    <a class="btn fill" href="https://bat.ftt2608.dabaas.net/" target="_blank" rel="noopener">問題サイトへ</a>
+    <a class="btn" href="https://scoring-ranking.ftt2608.dabaas.net/" target="_blank" rel="noopener">CTFd 採点サイトへ</a>
+  </div>
+  <p class="fine">※ 問題サイトへのアクセスには Basic 認証が必要です。ユーザー名とパスワードはチームチャットに配布されます。</p>
+</div>
+
+<div class="stats">
+  <div><b>8/28<i> 19:00</i></b><p>コンテスト開始</p></div>
+  <div><b>8/30<i> 14:00</i></b><p>コンテスト終了</p></div>
+  <div><b>FLAG&#123;&#125;</b><p>フラグ形式</p></div>
+  <div><b>1<i>回のみ</i></b><p>同一問題の加点</p></div>
+</div>
+
+<div class="page">
+
+  <section id="basic" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">01</span><h2>基本情報</h2><span class="en">OVERVIEW</span></div>
+      <div>
+        <p class="lead">本 CTF は、<strong>自チームの問題サイトを調査してフラグを見つける</strong>形式のコンテストです。見つけたフラグは CTFd 採点サイトから提出します。まずは全体像をつかみ、時間内にできるだけ多くのフラグを獲得しましょう。</p>
+        <ul class="tl">
+          <li class="now"><div class="date">2026.08.28 19:00</div><h3>コンテスト開始</h3><p>問題サイトへのアクセスと調査を開始できます。</p></li>
+          <li><div class="date">2026.08.30 14:00</div><h3>コンテスト終了</h3><p>この時刻をもってフラグの提出受付を締め切ります。</p></li>
+        </ul>
+        <p class="note">※ 開始・終了時刻は運営の案内に従ってください。変更がある場合はチームチャットで告知されます。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="access" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">02</span><h2>アクセス先</h2><span class="en">ENDPOINTS</span></div>
+      <div>
+        <dl class="spec">
+          <div>
+            <dt>CTFd 採点サイト</dt>
+            <dd><a class="inline-link u" href="https://scoring-ranking.ftt2608.dabaas.net/" target="_blank" rel="noopener">https://scoring-ranking.ftt2608.dabaas.net/</a><br>フラグ提出用の採点サイトです。</dd>
+          </div>
+          <div>
+            <dt>問題サイト<span class="tag">bat</span></dt>
+            <dd><a class="inline-link u" href="https://bat.ftt2608.dabaas.net/" target="_blank" rel="noopener">https://bat.ftt2608.dabaas.net/</a><br>各チーム専用の URL です。アクセスすると Basic 認証を求められます。</dd>
+          </div>
+        </dl>
+        <div class="callout">
+          <b>問題サイトの URL について</b><br>
+          問題サイトの URL は <span class="u">https://&#123;各チームのチーム名&#125;.ftt2608.dabaas.net/</span> の形式です。チーム名は運営から配布された「URL 用の表記」をそのまま使ってください（例: dreamarts チームなら <span class="u">team-dreamarts</span>）。本チーム <b>bat</b> の URL 用表記は <span class="u">bat</span> のため、アクセス先は <span class="u">https://bat.ftt2608.dabaas.net/</span> になります。実際の表記が異なる場合は運営配布の URL を優先してください。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="login" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">03</span><h2>ログイン情報</h2><span class="en">CREDENTIALS</span></div>
+      <div>
+        <p class="lead"><strong>CTFd 採点サイト</strong>のログイン ID・パスワード、および問題サイトの Basic 認証情報は、チームチャットで配布されます。問題サイトには、下記の初期ユーザーでログインできます。</p>
+
+        <h3 style="font-size:13px;letter-spacing:.1em;color:var(--sub);margin:0 0 12px;">問題サイト 初期ユーザー</h3>
+        <div class="mwrap">
+        <table class="cred">
+          <thead>
+            <tr><th style="width:28%">ユーザー名</th><th style="width:36%">パスワード</th><th>備考</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">aoi</td><td class="mono">Tr9$mW2vLx</td><td><span class="note-inline">初期ユーザー</span></td></tr>
+            <tr><td class="mono">ren</td><td class="mono">Kp4!nQ8zYb</td><td><span class="note-inline">初期ユーザー</span></td></tr>
+            <tr><td class="mono">mio</td><td class="mono">Jx7@hF3cRs</td><td><span class="note-inline">初期ユーザー</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="callout">
+          <b>ヒント</b><br>
+          ログイン後は、まず画面全体をひと通り触って全体像をつかみましょう。問題によっては、調査の途中で <b>別のユーザー情報</b> が必要になる場合があります。
+        </div>
+        <p class="note">※ CTFd のログイン情報は配布された ID・パスワードを使用してください。認証情報の取り扱いには注意し、他チームへ共有しないでください。</p>
+      </div>
+    </div>
+  </section>
+
+  </div>
+
+  <div class="page">
+  <section id="join" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">04</span><h2>参加方法</h2><span class="en">HOW TO PLAY</span></div>
+      <div>
+        <ol class="flow">
+          <li><div><b>問題サイトへアクセス</b><span>自チームの問題サイト（bat）へアクセスします。</span></div></li>
+          <li><div><b>初期ユーザーでログイン</b><span>aoi / ren / mio のいずれかで問題サイトへログインします。</span></div></li>
+          <li><div><b>全体像をつかむ</b><span>ログイン後、まず画面全体をひと通り触って全体像を把握します。</span></div></li>
+          <li><div><b>フラグを探す</b><span>問題サイトを探索し、FLAG&#123;...&#125; 形式のフラグを見つけます。</span></div></li>
+          <li><div><b>CTFd にアクセス・ログイン</b><span>採点サイトへアクセスし、配布されたチームアカウントでログインします。</span></div></li>
+          <li><div><b>フラグを提出</b><span>CTFd の提出フォームに、見つけたフラグを入力して提出します。</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="submit" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">05</span><h2>フラグ提出</h2><span class="en">SUBMISSION</span></div>
+      <div>
+        <p class="lead">問題サイトで見つけたフラグは、<strong>CTFd 採点サイトから提出</strong>してください。</p>
+        <dl class="spec">
+          <div><dt>提出先</dt><dd><a class="inline-link u" href="https://scoring-ranking.ftt2608.dabaas.net/" target="_blank" rel="noopener">https://scoring-ranking.ftt2608.dabaas.net/</a></dd></div>
+          <div><dt>フラグ形式</dt><dd><span class="u">FLAG&#123;...&#125;</span></dd></div>
+          <div><dt>加点</dt><dd>同じ問題を複数回正解しても、加点は 1 回のみです。</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="rule" class="reveal">
+    <div class="sec">
+      <div class="sec-label"><span class="n">06</span><h2>レギュレーション</h2><span class="en">RULES</span></div>
+      <div>
+        <ol class="rules">
+          <li><span><b>調査・攻撃してよい対象は、自チームの問題サイトのみ</b>です。</span></li>
+          <li><span>CTFd 採点サイト本体や、<b>他チームの問題サイトへの攻撃は禁止</b>です。</span></li>
+          <li><span>何らかの事象により CTF が続行できなくなった場合は、<b>運営に連絡</b>してください。</span></li>
+          <li><span><b>チーミングは禁止</b>です（フラグの取得方法を教える、自チームのログイン情報を他チームへ教える 等）。</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="reveal" style="border-top:1px solid var(--line)">
+    <div class="sec">
+      <div class="sec-label"><span class="n">07</span><h2>FAQ</h2><span class="en">FAQ</span></div>
+      <div class="faq">
+        <div class="q">
+          <h3><em>Q.</em>自動化ツールや AI 利用の制限はありますか？</h3>
+          <p><em style="font-style:normal;color:var(--ac);margin-right:10px;">A.</em>ありません。自由に利用して構いませんが、過負荷によりサーバーが重くなり探索ができなくなることが考えられます。その点を認識したうえで実行してください。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="foot">
+    <div class="l"><b>CTF 参加者向け案内</b><small>TEAM : bat ／ ftt2608.dabaas.net</small></div>
+    <div class="r"><time datetime="2026-08-28">2026.08.28 — 08.30</time><br>調査対象は自チームの問題サイトのみ</div>
+  </div>
+</footer>
+
+<script>
+document.getElementById('menuBtn').addEventListener('click',()=>document.body.classList.toggle('nav-open'));
+document.querySelectorAll('#drawer a').forEach(a=>a.addEventListener('click',()=>document.body.classList.remove('nav-open')));
+
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+const rail=[...document.querySelectorAll('.rail a')];
+const secs=rail.map(a=>document.querySelector(a.getAttribute('href')));
+const io2=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const i=secs.indexOf(e.target);
+    rail.forEach((a,k)=>a.classList.toggle('on',k===i));
+  });
+},{rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>s&&io2.observe(s));
+
+const prog=document.getElementById('prog');
+addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-innerHeight;
+  prog.style.width=(h>0?window.scrollY/h*100:0)+'%';
+},{passive:true});
+</script>
+</body>
+</html>
